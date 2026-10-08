@@ -1,0 +1,1264 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap");
+@import url("https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap");
+@import "tailwindcss";
+
+/* =========================================================
+   NEXUSPLAY DESIGN SYSTEM — "Deep Space Neon"
+   Phase 0 token core (PRD §5). All components consume these
+   tokens; legacy theme variables below alias them so the
+   whole app re-skins coherently in one place.
+   ========================================================= */
+
+/* ---------- Light theme (default) ---------- */
+:root {
+  /* Surfaces */
+  --np-bg-0: #f4f6ff;          /* page background */
+  --np-bg-1: #eceffb;          /* alternate section */
+  --np-bg-2: #ffffff;          /* card surface */
+  --np-glass: rgba(255, 255, 255, 0.7);
+  --np-stroke: rgba(15, 23, 42, 0.1);
+
+  /* Accent ramp */
+  --np-accent: #4f46e5;        /* primary CTA / active state */
+  --np-accent-strong: #4338ca; /* CTA hover */
+  --np-accent-2: #7c3aed;      /* gradient partner / display accents */
+  --np-accent-3: #0891b2;      /* tertiary highlight / data-viz / live */
+
+  /* Semantic — light theme text variants use darker steps so small
+     warning/status text passes WCAG AA on white cards (Phase 6) */
+  --np-success: #059669;
+  --np-warning: #b45309;
+  --np-danger: #e11d48;
+
+  /* Text ramp */
+  --np-text-hi: #0f172a;
+  --np-text-body: #334155;
+  --np-text-mute: #64748b;
+
+  /* Legacy aliases (used by existing components) */
+  --bg-main: var(--np-bg-0);
+  --bg-card: var(--np-bg-2);
+  --bg-input: #ffffff;
+  --bg-hover: #e8ebf7;
+  --bg-icon-box: #eef1fb;
+  --border-color: var(--np-stroke);
+  --text-main: var(--np-text-hi);
+  --text-muted: var(--np-text-mute);
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --accent: var(--np-accent);
+  --accent-hover: var(--np-accent-strong);
+  --accent-bright: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.1);
+  --accent-softer: rgba(99, 102, 241, 0.15);
+  --accent-ring: rgba(99, 102, 241, 0.2);
+  --accent-line: rgba(99, 102, 241, 0.3);
+  --danger: var(--np-danger);
+  --danger-hover: #be123c;
+  --danger-soft: rgba(225, 29, 72, 0.1);
+  --danger-text: #e11d48;
+
+  /* Motion tokens (PRD §6.1) */
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 300ms;
+  --dur-4: 600ms;
+  --dur-5: 900ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-cinematic: cubic-bezier(0.32, 0.72, 0, 1);
+  /* deprecated aliases kept so nothing breaks mid-migration */
+  --ease-cinematic: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: var(--dur-1);
+  --dur-base: var(--dur-3);
+  --dur-slow: var(--dur-5);
+
+  color-scheme: light;
+}
+
+/* ---------- Dark theme — Deep Space Neon (primary) ---------- */
+html.dark {
+  /* Surfaces */
+  --np-bg-0: #05060f;
+  --np-bg-1: #0a0c1a;
+  --np-bg-2: #10132b;
+  --np-glass: rgba(16, 19, 43, 0.6);
+  --np-stroke: rgba(255, 255, 255, 0.08);
+
+  /* Accent ramp */
+  --np-accent: #6366f1;
+  --np-accent-strong: #4f46e5;
+  --np-accent-2: #a78bfa;
+  --np-accent-3: #22d3ee;
+
+  /* Semantic */
+  --np-success: #34d399;
+  --np-warning: #fbbf24;
+  --np-danger: #fb7185;
+
+  /* Text ramp */
+  --np-text-hi: #f4f6ff;
+  --np-text-body: #c7cce8;
+  --np-text-mute: #8a90b8;
+
+  /* Legacy aliases */
+  --bg-main: var(--np-bg-0);
+  --bg-card: var(--np-bg-2);
+  --bg-input: #0a0c1a;
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-icon-box: #0a0c1a;
+  --border-color: var(--np-stroke);
+  --text-main: var(--np-text-hi);
+  --text-muted: var(--np-text-mute);
+  --header-bg: rgba(10, 12, 26, 0.92);
+  --accent: var(--np-accent);
+  --accent-hover: var(--np-accent-strong);
+  --accent-bright: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.1);
+  --accent-softer: rgba(99, 102, 241, 0.15);
+  --accent-ring: rgba(99, 102, 241, 0.2);
+  --accent-line: rgba(99, 102, 241, 0.3);
+  --danger: var(--np-danger);
+  --danger-hover: #f43f5e;
+  --danger-soft: rgba(251, 113, 133, 0.1);
+  --danger-text: #fb7185;
+
+  color-scheme: dark;
+}
+
+/* ---------- Derived brand ramp ---------- */
+:root {
+  --np-brand-gradient: linear-gradient(120deg, var(--np-accent), var(--np-accent-2) 55%, var(--np-accent-3));
+  --np-glow: 0 18px 44px -14px color-mix(in srgb, var(--np-accent) 45%, transparent);
+}
+
+/* ---------- Accent + danger utilities (existing API kept) ---------- */
+.accent-bg { background-color: var(--accent) !important; }
+.accent-bg-hover:hover { background-color: var(--accent-hover) !important; }
+.accent-text { color: var(--accent) !important; }
+.accent-text-bright { color: var(--accent-bright) !important; }
+.accent-border { border-color: var(--accent-line) !important; }
+.accent-soft-bg { background-color: var(--accent-soft) !important; }
+.accent-soft-text { color: var(--accent-bright) !important; }
+.accent-ring:focus { --tw-ring-color: var(--accent-ring); }
+
+.danger-bg { background-color: var(--danger) !important; }
+.danger-bg-hover:hover { background-color: var(--danger-hover) !important; }
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+body {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+  transition: background-color var(--dur-3) ease, color var(--dur-3) ease;
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Display type for hero/section headlines */
+.font-display {
+  font-family: "Clash Display", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Signature HUD eyebrow — every section opens with one */
+.np-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--np-accent-2);
+}
+
+/* Gradient display text */
+.np-display {
+  background: var(--np-brand-gradient);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+/* Cinematic scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--np-accent-3);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Theme utility classes (existing component API) */
+.theme-bg { background-color: var(--bg-main) !important; }
+.theme-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+.theme-header {
+  background-color: var(--header-bg) !important;
+  border-color: var(--border-color) !important;
+}
+.theme-input {
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+}
+.theme-icon-box {
+  background-color: var(--bg-icon-box) !important;
+  border-color: var(--border-color) !important;
+}
+.theme-border { border-color: var(--border-color) !important; }
+.theme-text { color: var(--text-main) !important; }
+.theme-subtext { color: var(--text-muted) !important; }
+.theme-hover:hover { background-color: var(--bg-hover) !important; }
+
+/* =========================================================
+   SURFACE LEVELS (PRD §5.3 — pick ONE per surface)
+   ========================================================= */
+
+/* Level 2: glass card */
+.np-glass {
+  background: var(--np-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--np-stroke);
+}
+
+/* Level 3: elevated glass + accent glow */
+.np-elevated {
+  background: var(--np-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--np-stroke);
+  box-shadow: var(--np-glow);
+}
+
+/* =========================================================
+   SCROLL REVEAL SYSTEM — GSAP-driven
+   Elements are visible by default; Reveal.jsx sets the hidden
+   state in JS. No-JS users and crawlers see full content.
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   PAGE TRANSITIONS (route scene wipe)
+   ========================================================= */
+
+.page-enter {
+  animation: pageIn 0.45s var(--ease-out-expo) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Full-screen scene wipe panels (driven by PageTransition) */
+.np-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.np-wipe-panel {
+  flex: 1;
+  background: linear-gradient(120deg, var(--np-bg-2) 0%, color-mix(in srgb, var(--np-accent) 22%, var(--np-bg-2)) 100%);
+  transform: translateY(-101%);
+}
+
+.np-wipe-panel:last-child {
+  transform: translateY(101%);
+}
+
+.np-wipe.is-covering .np-wipe-panel {
+  transform: translateY(0);
+  transition: transform var(--dur-3) var(--ease-cinematic);
+}
+
+.np-wipe.is-revealing .np-wipe-panel {
+  transition: transform var(--dur-4) var(--ease-cinematic);
+}
+
+.np-wipe.is-revealing .np-wipe-panel:first-child {
+  transform: translateY(-101%);
+}
+
+.np-wipe.is-revealing .np-wipe-panel:last-child {
+  transform: translateY(101%);
+}
+
+/* Dashboard variant (np-wipe--fast) — Emil-lens A/B of the cinematic
+   wipe for high-frequency internal navigation: a single translucent
+   scrim fades over the swap (180ms, --dur-2) instead of two gradient
+   panels (cover 300ms + reveal 620ms). Content still swaps under the
+   scrim; the pageIn boot still plays on arrival. */
+.np-wipe--fast .np-wipe-panel {
+  background: color-mix(in srgb, var(--np-bg-0) 55%, transparent);
+  transform: none;
+  opacity: 0;
+}
+
+.np-wipe--fast.is-covering .np-wipe-panel {
+  transform: none;
+  opacity: 1;
+  transition: opacity var(--dur-2) ease;
+}
+
+.np-wipe--fast.is-revealing .np-wipe-panel {
+  opacity: 0;
+  transition: opacity var(--dur-2) ease;
+}
+
+/* Theme-toggle icon swap — Moon↔Sun orbit-crossfade. Both icons stay
+   mounted (transitions can't play on a freshly mounted element); the
+   active one is upright, the idle one orbits out while fading. One
+   motion carries the swap. Reduced motion is flattened by the global
+   kill-switch. */
+.np-theme-disc {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+}
+
+.np-theme-icon {
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity var(--dur-2) ease,
+    transform var(--dur-3) var(--ease-cinematic);
+}
+
+.np-theme-icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.np-theme-icon--sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+
+.np-theme-disc[data-dark="true"] .np-theme-icon--moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+
+.np-theme-disc[data-dark="true"] .np-theme-icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* =========================================================
+   HERO LOAD-IN CHOREOGRAPHY
+   ========================================================= */
+
+.hero-in {
+  opacity: 0;
+  animation: heroIn 0.9s var(--ease-out-expo) forwards;
+  animation-delay: var(--hero-delay, 0ms);
+}
+
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-zoom {
+  animation: heroZoom 1.6s var(--ease-out-expo) both;
+}
+
+@keyframes heroZoom {
+  from {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ambient floating glow orbs */
+.glow-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+  animation: orbFloat 9s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes orbFloat {
+  from { transform: translate3d(0, -12px, 0) scale(1); }
+  to { transform: translate3d(24px, 18px, 0) scale(1.12); }
+}
+
+/* =========================================================
+   MICRO-INTERACTIONS (PRD §6.3)
+   ========================================================= */
+
+/* Tactile press for any interactive element */
+.btn-press {
+  transition:
+    transform var(--dur-1) var(--ease-out-expo),
+    box-shadow var(--dur-1) var(--ease-out-expo),
+    background-color var(--dur-1) ease,
+    border-color var(--dur-1) ease,
+    color var(--dur-1) ease;
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* Ripple element injected by usePressFeedback */
+.np-press {
+  position: relative;
+  overflow: hidden;
+}
+
+.np-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--np-accent-3) 45%, transparent) 0%,
+    color-mix(in srgb, var(--np-accent-3) 18%, transparent) 45%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%) scale(0);
+  animation: npRipple 500ms var(--ease-out-expo) forwards;
+}
+
+@keyframes npRipple {
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 3D tilt card (driven by useTilt) */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 140ms var(--ease-out-expo);
+  will-change: transform;
+  position: relative;
+}
+
+/* Specular glare sweeping across the tilt surface */
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-3) ease;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, 0.14),
+    transparent 55%
+  );
+}
+
+.tilt-card:hover .tilt-glare {
+  opacity: 1;
+}
+
+/* Card lift + tinted shadow (shadow hue = accent, not black) */
+.card-lift {
+  transition:
+    transform var(--dur-3) var(--ease-out-expo),
+    border-color var(--dur-3) ease,
+    box-shadow var(--dur-3) ease;
+  will-change: transform;
+}
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--np-glow);
+}
+
+/* Image zoom inside overflow-hidden parent */
+.zoom-img img {
+  transition: transform 0.7s var(--ease-out-expo);
+  will-change: transform;
+}
+.zoom-img:hover img {
+  transform: scale(1.07);
+}
+
+/* Shine sweep across cards on hover */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08) 48%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.08) 52%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.9s var(--ease-out-expo);
+  pointer-events: none;
+}
+.shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* Animated underline for nav links */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--accent-bright);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s var(--ease-out-expo);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Skeleton shimmer for loading states */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-hover);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+/* Soft perpetual float for badges/decor */
+.float-soft {
+  animation: floatSoft 5s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes floatSoft {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(5px); }
+}
+
+/* Brand gradient sheen for display text */
+.text-gradient {
+  background: var(--np-brand-gradient);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 6s ease-in-out infinite alternate;
+}
+@keyframes gradientShift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+/* =========================================================
+   NP BADGES (token-driven status pills — PRD §5.1)
+   ========================================================= */
+
+.np-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  border: 1px solid;
+}
+
+.np-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.np-badge-success {
+  color: var(--np-success);
+  border-color: color-mix(in srgb, var(--np-success) 30%, transparent);
+  background: color-mix(in srgb, var(--np-success) 10%, transparent);
+}
+
+.np-badge-warning {
+  color: var(--np-warning);
+  border-color: color-mix(in srgb, var(--np-warning) 30%, transparent);
+  background: color-mix(in srgb, var(--np-warning) 10%, transparent);
+}
+
+.np-badge-danger {
+  color: var(--np-danger);
+  border-color: color-mix(in srgb, var(--np-danger) 30%, transparent);
+  background: color-mix(in srgb, var(--np-danger) 10%, transparent);
+}
+
+.np-badge-accent {
+  color: var(--np-accent-3);
+  border-color: color-mix(in srgb, var(--np-accent-3) 30%, transparent);
+  background: color-mix(in srgb, var(--np-accent-3) 10%, transparent);
+}
+
+.np-badge-muted {
+  color: var(--np-text-mute);
+  border-color: var(--np-stroke);
+  background: color-mix(in srgb, var(--np-text-mute) 10%, transparent);
+}
+
+/* =========================================================
+   DASHBOARD SHELL (PRD §8.3) — nav rail, tooltips, header glass
+   ========================================================= */
+
+/* Active nav item: accent fill + left glow rail */
+.np-nav-active {
+  background: var(--np-accent);
+  box-shadow:
+    inset 3px 0 0 color-mix(in srgb, #fff 65%, transparent),
+    0 6px 18px -6px color-mix(in srgb, var(--np-accent) 55%, transparent);
+}
+
+.np-nav-active .np-nav-chevron {
+  opacity: 0.8 !important;
+}
+
+/* Icon-rail tooltip (collapsed sidebar) */
+.np-tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  background: var(--np-bg-2);
+  border: 1px solid var(--np-stroke);
+  color: var(--np-text-hi);
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-2) ease, transform var(--dur-2) var(--ease-out-expo);
+  z-index: 60;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+}
+
+.group:hover .np-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Header: transparent over content, glass once scrolled */
+.np-header-glass {
+  background: transparent;
+  transition: background-color var(--dur-3) ease, box-shadow var(--dur-3) ease;
+}
+
+.np-header-glass.is-scrolled {
+  background: var(--np-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.45);
+}
+
+/* Stat numeral — shared type treatment */
+.np-stat {
+  letter-spacing: -0.01em;
+}
+
+/* =========================================================
+   AUTH KIT (PRD §8.2) — input glow, error shake, boot-up entrance
+   ========================================================= */
+
+.np-input {
+  background: color-mix(in srgb, var(--np-bg-1) 82%, transparent);
+  border: 1px solid var(--np-stroke);
+  transition:
+    border-color var(--dur-2) ease,
+    box-shadow var(--dur-2) ease,
+    background-color var(--dur-2) ease;
+}
+
+.np-input::placeholder {
+  color: color-mix(in srgb, var(--np-text-mute) 75%, transparent);
+}
+
+.np-input:hover {
+  border-color: color-mix(in srgb, var(--np-accent) 28%, transparent);
+}
+
+.np-input:focus {
+  border-color: color-mix(in srgb, var(--np-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--np-bg-1) 60%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--np-accent) 45%, transparent),
+    0 0 22px -4px color-mix(in srgb, var(--np-accent) 45%, transparent);
+}
+
+/* Keyboard focus indicator — the page inputs carry Tailwind's
+   `outline-none`, which would otherwise defeat the global
+   :focus-visible ring (Phase 6 a11y fix). Outline-based so it is
+   visible even where the glow shadow is clipped or unsupported. */
+.np-input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--np-accent-3) 85%, transparent);
+  outline-offset: 1px;
+}
+
+.np-input-error:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--np-danger) 85%, transparent);
+  outline-offset: 1px;
+}
+
+.np-input-error {
+  border-color: color-mix(in srgb, var(--np-danger) 55%, transparent);
+}
+
+.np-input-error:focus {
+  border-color: var(--np-danger);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--np-danger) 50%, transparent),
+    0 0 22px -4px color-mix(in srgb, var(--np-danger) 40%, transparent);
+}
+
+/* Error shake — applied via key-bump on the form card */
+@keyframes npShake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.np-shake {
+  animation: npShake 0.5s var(--ease-out-expo) both;
+}
+
+/* Boot-up entrance — staggered via --boot-delay */
+.np-boot {
+  opacity: 0;
+  animation: npBoot 0.6s var(--ease-out-expo) forwards;
+  animation-delay: var(--boot-delay, 0ms);
+}
+
+@keyframes npBoot {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Modal entrance — scale+fade per §8.4, reused by every role's modals.
+   The global reduced-motion kill-switch collapses these to instant. */
+.np-modal {
+  animation: npModalIn 0.3s var(--ease-out-expo) both;
+}
+
+@keyframes npModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.np-modal-backdrop {
+  animation: npBackdropIn 0.3s var(--ease-out-expo) both;
+}
+
+@keyframes npBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal exit — subtler than the enter (exits recede upward, they don't
+   reverse the entrance). Driven by [data-closing] on the backdrop; the
+   consumer unmounts after the 200ms window. The global reduced-motion
+   kill-switch collapses these to instant — the unmount timer is JS and
+   unaffected. */
+.np-modal-backdrop[data-closing] {
+  animation: npBackdropOut 0.2s ease forwards;
+}
+
+@keyframes npBackdropOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.np-modal-backdrop[data-closing] .np-modal {
+  animation: npModalOut 0.2s var(--ease-out-expo) forwards;
+}
+
+@keyframes npModalOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+}
+
+/* Mobile drawer (DashboardShell) — same contract: enter from the edge it
+   lives on, exit subtler, backdrop shared with the modal. [data-closing]
+   driven; consumer unmounts after the ~220ms window. The global
+   reduced-motion kill-switch collapses all of it to instant. */
+.np-drawer-backdrop {
+  animation: npBackdropIn 0.3s var(--ease-out-expo) both;
+}
+
+.np-drawer-backdrop[data-closing] {
+  animation: npBackdropOut 0.2s ease forwards;
+}
+
+.np-drawer {
+  animation: npDrawerIn 0.3s var(--ease-out-expo) both;
+}
+
+@keyframes npDrawerIn {
+  from {
+    opacity: 0.4;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.np-drawer[data-closing] {
+  animation: npDrawerOut 0.22s var(--ease-out-expo) forwards;
+}
+
+@keyframes npDrawerOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
+/* Row stagger — opt-in for dashboard lists/tables (PRD §8.3).
+   Put .np-stagger on the list container; each direct child enters
+   with the boot rise, 40ms apart, capped at 12 rows. */
+.np-stagger > * {
+  opacity: 0;
+  animation: npBoot 0.5s var(--ease-out-expo) forwards;
+}
+
+.np-stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.np-stagger > *:nth-child(2)  { animation-delay: 40ms; }
+.np-stagger > *:nth-child(3)  { animation-delay: 80ms; }
+.np-stagger > *:nth-child(4)  { animation-delay: 120ms; }
+.np-stagger > *:nth-child(5)  { animation-delay: 160ms; }
+.np-stagger > *:nth-child(6)  { animation-delay: 200ms; }
+.np-stagger > *:nth-child(7)  { animation-delay: 240ms; }
+.np-stagger > *:nth-child(8)  { animation-delay: 280ms; }
+.np-stagger > *:nth-child(9)  { animation-delay: 320ms; }
+.np-stagger > *:nth-child(10) { animation-delay: 360ms; }
+.np-stagger > *:nth-child(11) { animation-delay: 400ms; }
+.np-stagger > *:nth-child(12) { animation-delay: 440ms; }
+.np-stagger > *:nth-child(n + 13) { animation-delay: 480ms; }
+
+/* =========================================================
+   TOASTS (sonner, restyled to tokens)
+   ========================================================= */
+
+.np-toast {
+  background: var(--np-glass) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--np-stroke) !important;
+  border-left: 3px solid var(--np-accent) !important;
+  color: var(--np-text-hi) !important;
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  border-radius: 14px !important;
+  box-shadow: var(--np-glow) !important;
+}
+
+/* =========================================================
+   SCROLL PROGRESS BAR
+   ========================================================= */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  z-index: 60;
+  pointer-events: none;
+  background: var(--np-brand-gradient);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--scroll-progress, 0));
+}
+
+/* =========================================================
+   LANDING DARK SURFACE — the landing is a cinematic dark surface
+   in both themes (pre-existing behavior). Pin the dark token
+   VALUES (§5.1) at the landing root so var()-based sections keep
+   the deep-space look when the app theme is light. Single source:
+   change the values here, not in components.
+   ========================================================= */
+.np-dark-surface {
+  --np-bg-0: #05060f;
+  --np-bg-1: #0a0c1a;
+  --np-bg-2: #10132b;
+}
+
+/* =========================================================
+   GAMEART MEDIA PLATES (GameArt.jsx) — Phase 7 P1/P3
+   Per-game 3D-style plates: accent gradient + perspective
+   neon grid floor + glowing line-art emblem. Accent colors
+   are injected per game via gameTheme() (PRD §5.1 single
+   source); all surfaces consume the same util.
+   ========================================================= */
+
+.np-gameart {
+  --gameart-accent: var(--np-gameart-accent, var(--np-accent));
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+}
+
+/* Photographic game banner (card variant, games with shipped art) —
+   subtle scale on plate hover; the card's zoom-img class drives the
+   actual zoom on the outer wrapper. */
+.np-gameart-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  transition: transform 0.6s var(--ease-cinematic);
+}
+
+.np-gameart:hover .np-gameart-photo {
+  transform: scale(1.04);
+}
+
+/* Legibility scrim over photo art */
+.np-gameart-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(5, 6, 15, 0.55), rgba(5, 6, 15, 0.1) 45%, rgba(5, 6, 15, 0.05)),
+    color-mix(in srgb, var(--gameart-accent) 14%, transparent);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Horizon glow behind the emblem */
+.np-gameart-horizon {
+  position: absolute;
+  inset: auto -20% 18% -20%;
+  height: 46%;
+  background: radial-gradient(
+    50% 100% at 50% 100%,
+    color-mix(in srgb, var(--gameart-accent) 34%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Perspective grid floor — receding neon lines */
+.np-gameart-grid {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 62%;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--gameart-accent) 26%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--gameart-accent) 18%, transparent) 1px, transparent 1px);
+  background-size: 44px 26px;
+  transform: perspective(220px) rotateX(58deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.95));
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Emblem figure — floats gently; static under reduced motion */
+.np-gameart-figure {
+  position: relative;
+  z-index: 2;
+  width: 38%;
+  max-width: 132px;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gameart-accent) 55%, transparent));
+  animation: gameartFloat 7s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.np-gameart--showcase .np-gameart-figure {
+  width: 44%;
+  max-width: 168px;
+}
+
+.np-gameart-emblem {
+  width: 100%;
+  height: auto;
+  display: block;
+  opacity: 0.95;
+}
+
+/* Specular sheen sweep on hover — the plate's single motion response */
+.np-gameart-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.10) 48%, transparent 60%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  transition: background-position 0.7s var(--ease-cinematic);
+}
+
+.np-gameart:hover .np-gameart-sheen {
+  background-position: 0 0;
+}
+
+/* Showcase caption */
+.np-gameart-caption {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  background: linear-gradient(to top, rgba(5, 6, 15, 0.92), rgba(5, 6, 15, 0.45) 55%, transparent);
+}
+
+.np-gameart-name {
+  font-family: "Clash Display", "Outfit", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  color: var(--np-text-hi);
+}
+
+.np-gameart-genre {
+  margin-top: 0.1rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--gameart-accent) 85%, white);
+}
+
+@keyframes gameartFloat {
+  from { transform: translateY(0) rotate(0.001deg); }
+  to { transform: translateY(-9px) rotate(0.001deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .np-gameart-figure { animation: none; }
+}
+
+/* =========================================================
+   GAMES RING 2.0 (GamesRing2.jsx) — Phase 7 P3-rev
+   GameArt banner plates on a tilted CSS 3D cylinder; center
+   glass hub shows the hovered/front game's live stats.
+   ========================================================= */
+
+.np-ring2-stage {
+  position: relative;
+  height: 320px;
+  cursor: grab;
+  perspective: 1400px;
+  touch-action: pan-y;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+
+@media (max-width: 640px) {
+  .np-ring2-stage { height: 220px; }
+}
+
+.np-ring2-stage:active {
+  cursor: grabbing;
+}
+
+/* Ring box sized from JS (plate.w/h) so plates + radius stay in sync */
+.np-ring2 {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  transform-style: preserve-3d;
+  will-change: transform;
+  /* Tilt the cylinder so it reads as a ring, not a slot machine */
+  rotate: x 8deg;
+}
+
+.np-ring2-plate {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 44px -18px color-mix(in srgb, var(--np-accent) 45%, transparent);
+  transition: border-color var(--dur-2) ease, box-shadow var(--dur-2) ease,
+    filter var(--dur-2) ease;
+  filter: brightness(0.72) saturate(0.85);
+}
+
+.np-ring2-plate.is-active {
+  border-color: color-mix(in srgb, var(--np-accent) 55%, transparent);
+  box-shadow: 0 22px 54px -16px color-mix(in srgb, var(--np-accent) 65%, transparent);
+  filter: brightness(1) saturate(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .np-ring2-stage { height: auto; }
+}
+
+/* =========================================================
+   REDUCED MOTION — everything collapses to static
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .glow-orb,
+  .float-soft,
+  .skeleton::after {
+    animation: none !important;
+  }
+
+  .np-boot {
+    opacity: 1 !important;
+    animation: none !important;
+    filter: none !important;
+  }
+
+  .np-shake {
+    animation: none !important;
+  }
+
+  .np-stagger > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+
+  .tilt-card {
+    transform: none !important;
+  }
+}

@@ -1,0 +1,108 @@
+# =========================
+# Root / General
+# =========================
+node_modules/
+*.log
+logs/
+*.local
+.DS_Store
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Package Managers
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =========================
+# Build Outputs
+# =========================
+dist/
+dist-ssr/
+build/
+coverage/
+
+# =========================
+# Vite (React Client)
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.cache/
+
+# =========================
+# Express Server
+# =========================
+backend/node_modules/
+backend/logs/
+backend/uploads/
+backend/tmp/
+
+# =========================
+# Mongoose / Database Related
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+mongodb-data/
+backend/data-db/
+backend/mongodb-portable/
+backend/mongodb-portable.zip
+backend/logs/mongod.log*
+
+# =========================
+# OS Files
+# =========================
+Thumbs.db
+.DS_Store
+
+# =========================
+# Editor / IDE
+# =========================
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# =========================
+# Testing / Misc
+# =========================
+coverage/
+.nyc_output/
+.cache/
+
+# Original raster assets kept only locally (optimized WebP is committed)
+frontend/src/assets/landing/originals/
+
+# =========================
+# Game / Asset Extraction (never commit these)
+# =========================
+game/albion_extract/
+game/albion_rip_out/
+game/tools/
+game/unity_project/[Ll]ibrary/
+game/unity_project/[Tt]emp/
+game/unity_project/[Oo]bj/
+game/unity_project/[Bb]uild/
+game/unity_project/[Bb]uilds/
+game/unity_project/[Ll]ogs/
+game/unity_project/[Uu]ser[Ss]ettings/
+
+# Freebuff agent/session state
+.freebuff/
+
+# Local history archive (git bundle of the pre-rebuild repo)
+.archives/

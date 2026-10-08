@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NexusPlay motion audit — 2026-09-28</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: oklch(0.155 0.006 255);
+      --surface: oklch(0.195 0.007 255);
+      --surface-2: oklch(0.235 0.008 255);
+      --paper: oklch(0.945 0.004 255);
+      --paper-dim: oklch(0.800 0.006 255);
+      --muted: oklch(0.680 0.008 255);
+      --faint: oklch(0.505 0.008 255);
+      --line: oklch(0.95 0.01 255 / 0.09);
+      --line-strong: oklch(0.95 0.01 255 / 0.16);
+
+      --crit: oklch(0.655 0.185 25);
+      --imp: oklch(0.805 0.125 78);
+      --opp: oklch(0.745 0.135 152);
+      --t-good: oklch(0.745 0.135 152);
+      --t-mid: oklch(0.805 0.125 78);
+      --t-slow: oklch(0.655 0.185 25);
+
+      --accent: var(--paper);
+      --accent-soft: var(--paper-dim);
+      --accent-tint: oklch(0.945 0.004 255 / 0.08);
+
+      --display: "Familjen Grotesk", "Hanken Grotesk", system-ui, sans-serif;
+      --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    :root:has(#theme-light:checked) {
+      --ink: oklch(0.985 0.003 255);
+      --surface: oklch(0.965 0.004 255);
+      --surface-2: oklch(0.940 0.005 255);
+      --paper: oklch(0.180 0.006 255);
+      --paper-dim: oklch(0.330 0.008 255);
+      --muted: oklch(0.475 0.010 255);
+      --faint: oklch(0.640 0.009 255);
+      --line: oklch(0.180 0.010 255 / 0.12);
+      --line-strong: oklch(0.180 0.010 255 / 0.22);
+
+      --crit: oklch(0.550 0.200 27);
+      --imp: oklch(0.640 0.140 75);
+      --opp: oklch(0.560 0.145 152);
+      --t-good: oklch(0.560 0.145 152);
+      --t-mid: oklch(0.640 0.140 75);
+      --t-slow: oklch(0.550 0.200 27);
+
+      --accent: var(--paper);
+      --accent-soft: var(--paper-dim);
+      --accent-tint: oklch(0.180 0.006 255 / 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--sans);
+      margin: 0;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 28px 64px; }
+    a { color: inherit; }
+
+    .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+    .mono-label {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    .theme-switch { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+    .theme-switch .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 100px; overflow: hidden; }
+    .theme-switch label {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); padding: 5px 12px; cursor: pointer; user-select: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    #theme-dark:checked ~ .wrap .theme-switch label[for="theme-dark"],
+    #theme-light:checked ~ .wrap .theme-switch label[for="theme-light"] {
+      background: color-mix(in oklch, var(--paper) 12%, transparent);
+      color: var(--paper);
+    }
+
+    header .eyebrow { margin-bottom: 10px; }
+    h1.title {
+      font-family: var(--display);
+      font-size: clamp(30px, 4.5vw, 44px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+    }
+    p.lede { color: var(--paper-dim); max-width: 70ch; margin: 0 0 10px; }
+    .meta-row { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-bottom: 22px; }
+    .stats { display: flex; gap: 26px; flex-wrap: wrap; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat { display: flex; flex-direction: column; gap: 2px; text-decoration: none; }
+    .stat b { font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1; }
+    .stat span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+    .stat[data-sev="crit"] b { color: var(--crit); }
+    .stat[data-sev="imp"] b { color: var(--imp); }
+    .stat[data-sev="opp"] b { color: var(--opp); }
+
+    section { margin-top: 56px; }
+    section > .mono-label { display: block; margin-bottom: 10px; }
+    .assessment p {
+      font-family: var(--display);
+      font-size: clamp(18px, 2.4vw, 22px);
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      max-width: 62ch;
+      margin: 0;
+      color: var(--paper);
+    }
+
+    .lens-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .lens-table th {
+      text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--faint); font-weight: 500; padding: 8px 12px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    .lens-table td { padding: 14px 12px; border-bottom: 1px solid var(--line); vertical-align: top; transition: border-color 0.2s ease; }
+    .lens-table tr:hover td { border-color: var(--line-strong); }
+    .lens-name { font-weight: 600; }
+    .chip {
+      display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 100px;
+      border: 1px solid var(--line-strong); color: var(--muted); margin-left: 8px; vertical-align: 2px;
+    }
+    .chip.primary { color: var(--paper); border-color: var(--paper-dim); }
+    .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 0; }
+    .dot.ok { background: var(--t-good); }
+    .dot.concern { background: var(--t-mid); }
+    .dot.problem { background: var(--crit); }
+    .dot.mixed { background: var(--imp); }
+
+    .timing-grid { display: grid; grid-template-columns: 660px 1fr; gap: 28px; align-items: start; }
+    .timing-svg { width: 100%; height: auto; display: block; }
+    .key-list { list-style: none; margin: 0; padding: 0; }
+    .key-list li { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .key-list .n { font-family: var(--mono); font-size: 10px; color: var(--faint); min-width: 20px; }
+    .key-list .t { font-family: var(--mono); font-size: 11px; color: var(--paper-dim); margin-left: auto; white-space: nowrap; }
+    .off-block { margin-top: 18px; font-size: 13.5px; color: var(--paper-dim); max-width: 62ch; }
+    .off-block b { color: var(--paper); }
+    .zone-band { opacity: 0.14; }
+
+    .lens-sec__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+    .lens-sec__head h3 { font-family: var(--display); font-size: 24px; margin: 0; letter-spacing: -0.01em; }
+    .lens-sec__verdict { color: var(--paper-dim); font-size: 13.5px; margin: 2px 0 22px; }
+    .lens-block { margin-top: 26px; }
+    .lens-block > .mono-label { display: block; margin-bottom: 10px; }
+    .lens-list { list-style: none; margin: 0; padding: 0; }
+    .lens-list li { padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .lens-list.good li::before { content: "✓"; color: var(--opp); font-weight: 700; margin-right: 10px; }
+    .lens-list.opp li::before { content: "💡"; margin-right: 8px; }
+    .lens-list code, .find-loc code, .rec-table code { font-family: var(--mono); font-size: 11.5px; color: var(--accent-soft); background: var(--accent-tint); padding: 1px 6px; border-radius: 5px; }
+    .lens-empty { color: var(--faint); font-style: italic; margin: 0; }
+
+    .finding-row {
+      display: grid; grid-template-columns: 1fr 380px; gap: 26px;
+      padding: 22px 0; border-bottom: 1px solid var(--line); transition: border-color 0.2s ease;
+    }
+    .finding-row:hover { border-color: var(--line-strong); }
+    .find-tags { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .sev-chip {
+      font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 100px; font-weight: 600;
+    }
+    .sev-chip.crit { background: color-mix(in oklch, var(--crit) 18%, transparent); color: var(--crit); }
+    .sev-chip.imp { background: color-mix(in oklch, var(--imp) 18%, transparent); color: var(--imp); }
+    .lens-chip { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid var(--line-strong); color: var(--muted); }
+    .finding-row h4 { font-family: var(--display); font-size: 18px; margin: 0 0 10px; letter-spacing: -0.01em; }
+    .find-body p { margin: 0 0 10px; font-size: 14px; color: var(--paper-dim); }
+    .find-body .label {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--faint); display: inline-block; min-width: 118px;
+    }
+    .fix { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 12px 0; background: var(--surface); }
+    .fix p { margin: 0; }
+    .find-loc { font-size: 12px; color: var(--faint); margin: 10px 0 0; }
+
+    .rec-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .rec-table th {
+      text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--faint); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--line-strong);
+    }
+    .rec-table td { padding: 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; vertical-align: top; transition: border-color 0.2s ease; }
+    .rec-table tr:hover td { border-color: var(--line-strong); }
+    .tier-label { display: flex; align-items: baseline; gap: 12px; margin-top: 34px; }
+    .tier-label .rule { flex: 1; border-top: 1px solid var(--line); }
+    .tier-label .mono-label { margin: 0; }
+    .tier-crit .mono-label { color: var(--crit); }
+    .tier-imp .mono-label { color: var(--imp); }
+    .tier-opp .mono-label { color: var(--opp); }
+
+    .ref-summary { border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; background: var(--surface); }
+    .ref-summary p { margin: 0 0 10px; font-size: 14px; color: var(--paper-dim); max-width: 72ch; }
+    .ref-summary p:last-child { margin-bottom: 0; }
+
+    footer { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+    /* ───────────── Demo card shell (shared) ───────────── */
+    .demo { position: relative; width: 380px; max-width: 100%; }
+    .demo__bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .demo__meta { min-width: 0; }
+    .demo__title { display: block; font-size: 13.5px; font-weight: 600; color: var(--paper); line-height: 1.3; }
+    .demo__timing { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .demo__controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .demo__loop { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+    .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 100px; overflow: hidden; }
+    .seg label { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 4px 9px; cursor: pointer; user-select: none; transition: background 0.15s ease, color 0.15s ease; }
+    .demo input[id$="-a"]:checked ~ .demo__bar .seg label[for$="-a"],
+    .demo input[id$="-l"]:checked ~ .demo__bar .seg label[for$="-l"],
+    .demo input[id$="-d"]:checked ~ .demo__bar .seg label[for$="-d"] {
+      background: color-mix(in oklch, var(--paper) 12%, transparent);
+      color: var(--paper);
+    }
+    .demo__stage {
+      --st-bg: var(--surface-2);
+      --st-fg: var(--paper);
+      --st-line: var(--line-strong);
+      --st-dim: color-mix(in oklch, var(--paper) 55%, transparent);
+      background: var(--st-bg); color: var(--st-fg);
+      border: 1px solid var(--line); border-radius: 10px;
+      padding: 32px 24px; min-height: 168px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .demo input[id$="-l"]:checked ~ .demo__stage {
+      --st-bg: oklch(0.985 0.003 255);
+      --st-fg: oklch(0.180 0.006 255);
+      --st-line: oklch(0.180 0.010 255 / 0.18);
+      --st-dim: oklch(0.180 0.010 255 / 0.45);
+    }
+    .demo input[id$="-d"]:checked ~ .demo__stage {
+      --st-bg: oklch(0.180 0.006 255);
+      --st-fg: oklch(0.985 0.003 255);
+      --st-line: oklch(0.985 0.010 255 / 0.18);
+      --st-dim: oklch(0.985 0.010 255 / 0.50);
+    }
+    .ui-btn { display: inline-flex; align-items: center; justify-content: center; padding: 9px 18px; border-radius: 8px; background: var(--st-fg); color: var(--st-bg); font-family: var(--sans); font-size: 13px; font-weight: 600; }
+    .ui-card { background: var(--st-bg); border: 1px solid var(--st-line); border-radius: 10px; padding: 14px 16px; min-width: 180px; box-shadow: 0 8px 24px oklch(0 0 0 / 0.12); }
+    .ui-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--st-fg); }
+    .ui-check { width: 22px; height: 22px; border-radius: 7px; background: var(--st-fg); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ui-check svg { width: 13px; height: 13px; stroke: var(--st-bg); }
+    .ui-num { font-family: var(--display); font-size: 34px; font-weight: 700; color: var(--st-fg); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .ui-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--st-dim); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .demo__loop { display: none; }
+      [class*="__mt"], [class*="__mt"] * { animation: none !important; transition: none !important; }
+    }
+
+    /* Per-finding motion (1-indexed across the report) */
+    @media (prefers-reduced-motion: no-preference) {
+      @keyframes m1 {
+        0%   { opacity: 1; transform: translateY(0) scale(1); }
+        8%   { opacity: 1; transform: translateY(0) scale(1); }
+        42%  { opacity: 0; transform: translateY(-7px) scale(0.985); }
+        50%  { opacity: 0; transform: translateY(11px) scale(0.972); }
+        88%  { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .demo-1__mt { animation: m1 3s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+
+      @keyframes m2 {
+        0%   { opacity: 1; transform: translateX(0); }
+        8%   { opacity: 1; transform: translateX(0); }
+        40%  { opacity: 0; transform: translateX(-14px); }
+        50%  { opacity: 0.4; transform: translateX(-24px); }
+        88%  { opacity: 1; transform: translateX(0); }
+        100% { opacity: 1; transform: translateX(0); }
+      }
+      .demo-2__mt { animation: m2 3s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+    }
+
+    @media (max-width: 900px) {
+      .finding-row { grid-template-columns: 1fr; }
+      .timing-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .lens-table thead { display: none; }
+      .lens-table tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+      .lens-table td { display: block; border: none; padding: 3px 0; }
+    }
+    /* ---- Applied-state (report updated 2026-09-29 after fixes shipped) ---- */
+    .audited {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--faint);
+      border: 1px dashed var(--stroke);
+      border-radius: 8px;
+      padding: 8px 12px;
+      width: fit-content;
+    }
+    .stat.done { opacity: 0.75; }
+    .stat.done b { color: var(--good); }
+    .done-chip {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--good);
+      border: 1px solid var(--good);
+      border-radius: 999px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    .rec-table tr.done td { opacity: 0.72; }
+    .rec-table tr.done td:first-child { padding-right: 0; }
+    .rec-table tr.done .done-chip { margin-left: 6px; }
+    .strike { text-decoration: line-through; text-decoration-thickness: 1px; opacity: 0.6; }
+
+  </style>
+</head>
+<body>
+  <input class="vh" type="radio" name="theme" id="theme-dark" checked>
+  <input class="vh" type="radio" name="theme" id="theme-light">
+  <div class="wrap">
+
+    <div class="theme-switch">
+      <div class="seg">
+        <label for="theme-dark">Dark</label>
+        <label for="theme-light">Light</label>
+      </div>
+    </div>
+
+    <header>
+      <span class="eyebrow mono-label">MOTION AUDIT · DESIGN-MOTION-PRINCIPLES</span>
+      <h1 class="title">NexusPlay — purposeful motion audit</h1>
+      <p class="lede">Audit of the motion system across the NexusPlay esports platform: the cinematic landing (GSAP + Lenis + CSS keyframes) and the productivity-grade role dashboards (Tailwind transitions, tokenized timing, press feedback). Weighted for its split context: dashboards judged by Emil (restraint &amp; speed), landing polish by Jakub, hero/ring spectacle by Jhey.</p>
+      <div class="meta-row">React 19 · Tailwind v4 · GSAP 3 · Lenis · CSS keyframes · no Framer Motion · audited 2026-09-28 · findings applied 2026-09-29</div>
+      <div class="stats">
+        <a class="stat done" href="#rec-crit" data-sev="crit"><b>2</b><span>Critical</span></a>
+        <a class="stat" href="#rec-imp" data-sev="imp"><b>0</b><span>Important</span></a>
+        <a class="stat done" href="#rec-opp" data-sev="opp"><b>4</b><span>Opportunities</span></a>
+      </div>
+      <p class="audited">✅ Status update 2026-09-29: both Criticals fixed and both were also live-verified in the running app. All 4 Opportunities applied (see §06 tables).</p>
+    </header>
+
+    <section class="assessment">
+      <span class="mono-label">OVERALL</span>
+      <p>This is a disciplined motion system wearing a cinematic coat. Timing is tokenized (120/180/300/600/900ms), easing is custom end-to-end, and the app-level reduced-motion kill-switch is genuinely complete — rare at any budget. <span class="strike">What's missing is the second half of choreography: two of the three overlay surfaces (registration modal, mobile drawer) enter beautifully and then vanish with no exit at all, which is the exact "elements just disappear" tell this system otherwise avoids.</span> <b>Update 2026-09-29:</b> that second half now exists — both overlays close with data-closing exit choreography (modal 200ms recede, drawer 220ms slide), live-verified in the running app. Everything that animates is purposeful; nothing pulses, nothing bounces, nothing staggers by default.</p>
+    </section>
+
+    <section>
+      <span class="mono-label">01 · LENS SUMMARY</span>
+      <table class="lens-table">
+        <thead>
+          <tr><th>Lens</th><th>Verdict</th><th>One-line read</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="lens-name">Emil Kowalski<span class="chip primary">Primary</span></td>
+            <td><span class="dot ok"></span>Resolved</td>
+            <td>Restraint held everywhere once the two vanishing overlays learned their goodbye (both exits shipped 2026-09-29).</td>
+          </tr>
+          <tr>
+            <td class="lens-name">Jakub Krehel<span class="chip">Secondary</span></td>
+            <td><span class="dot ok"></span>Strong</td>
+            <td>Blur+rise+scale enters at scale 0.972, tokenized ramps, dead token pruned — production polish throughout.</td>
+          </tr>
+          <tr>
+            <td class="lens-name">Jhey Tompkins<span class="chip">Selective</span></td>
+            <td><span class="dot ok"></span>Strong</td>
+            <td>One documented CSS-3D ring with inertia, one brand gradient loop, orb fields on static art — delight with a paper trail.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <span class="mono-label">02 · WHERE THE TIMINGS LAND</span>
+      <div class="timing-grid">
+        <div>
+          <svg class="timing-svg" viewBox="0 0 660 300" role="img" aria-label="Duration budget diagram plotting NexusPlay animations from 0 to 600 milliseconds">
+            <rect class="zone-band" x="40"  y="30" width="100" height="210" fill="var(--t-good)"/>
+            <rect class="zone-band" x="140" y="30" width="160" height="210" fill="var(--t-good)"/>
+            <rect class="zone-band" x="300" y="30" width="200" height="210" fill="var(--t-mid)"/>
+            <rect class="zone-band" x="500" y="30" width="120" height="210" fill="var(--t-slow)"/>
+            <g font-family="Geist Mono, monospace" font-size="10" fill="var(--faint)" text-anchor="middle">
+              <text x="90"  y="258">0–100 instant</text>
+              <text x="220" y="258">100–300 responsive</text>
+              <text x="400" y="258">300–500 deliberate</text>
+              <text x="560" y="258">500ms+ sluggish</text>
+            </g>
+            <g stroke="var(--line-strong)"><line x1="40" y1="30" x2="40" y2="240"/><line x1="140" y1="30" x2="140" y2="240"/><line x1="300" y1="30" x2="300" y2="240"/><line x1="500" y1="30" x2="500" y2="240"/><line x1="620" y1="30" x2="620" y2="240"/></g>
+            <g>
+              <circle cx="44"   cy="60"  r="9" fill="var(--t-good)"/><text x="44"   y="64"  font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">4</text>
+              <circle cx="106"  cy="95"  r="9" fill="var(--t-good)"/><text x="106"  y="99"  font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">1</text>
+              <circle cx="106"  cy="130" r="9" fill="var(--t-good)"/><text x="106"  y="134" font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">2</text>
+              <circle cx="44"   cy="165" r="9" fill="var(--t-good)" stroke="var(--paper-dim)" stroke-dasharray="3 3" stroke-width="1.5"/>
+              <circle cx="220"  cy="60"  r="9" fill="var(--t-good)"/><text x="220"  y="64"  font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">3</text>
+              <circle cx="220"  cy="200" r="9" fill="var(--t-good)"/><text x="220"  y="204" font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">5</text>
+              <circle cx="400"  cy="130" r="9" fill="var(--t-mid)"/><text x="400"  y="134" font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">7</text>
+              <circle cx="400"  cy="95"  r="9" fill="var(--t-mid)"/><text x="400"  y="99"  font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">8</text>
+              <circle cx="490"  cy="60"  r="9" fill="var(--t-mid)"/><text x="490"  y="64"  font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">9</text>
+              <circle cx="550"  cy="165" r="9" fill="var(--t-mid)"/><text x="550"  y="169" font-size="9" text-anchor="middle" fill="var(--ink)" font-family="Geist Mono, monospace">6</text>
+            </g>
+          </svg>
+        </div>
+        <ul class="key-list">
+          <li><span class="n">1</span>Button press / hover transitions<span class="t">120ms · expo-out</span></li>
+          <li><span class="n">2</span>Modal &amp; backdrop enter<span class="t">300ms · expo-out</span></li>
+          <li><span class="n">3</span>List stagger (np-stagger)<span class="t">500ms · expo-out</span></li>
+          <li><span class="n">4</span>Drawer/modal exit (before fix)<span class="t">none — instant</span></li>
+          <li><span class="n">5</span>Tooltip fade-slide<span class="t">180ms · expo-out</span></li>
+          <li><span class="n">6</span>Route wipe beat<span class="t">320 + 620ms · expo</span></li>
+          <li><span class="n">7</span>Page enter (pageIn)<span class="t">450ms · expo-out</span></li>
+          <li><span class="n">8</span>Hero boot rise (npBoot)<span class="t">600ms · expo-out</span></li>
+          <li><span class="n">9</span>Reveal (GSAP from)<span class="t">850ms · power3.out</span></li>
+        </ul>
+      </div>
+      <div class="off-block">
+        <b>What's off:</b> the two hollow dashed dots are the finding — the modal and the mobile drawer have no exit timing at all, so the most-choreographed surfaces in the product are also the only ones that end in a hard cut. The deliberate-zone entries (450–850ms) are all first-paint or scroll-reveal moments on the landing, which is the context Jakub and Jhey explicitly permit; the dashboard interaction layer itself never crosses 300ms.
+      </div>
+    </section>
+
+    <section>
+      <div class="lens-sec__head">
+        <h3>Emil Kowalski — Restraint &amp; Speed</h3>
+        <span class="chip primary">Primary</span>
+      </div>
+      <p class="lens-sec__verdict"><span class="dot ok"></span>Verdict: Resolved — the two overlay hard cuts were fixed and live-verified on 2026-09-29; everything else passed the frequency gate.</p>
+
+      <div class="lens-block">
+        <span class="mono-label">WHAT'S WORKING WELL</span>
+        <ul class="lens-list good">
+          <li>Tokenized timing ramp (120/180/300/600/900ms) with a single custom expo-out curve used consistently — no default <code>ease</code> anywhere in the interaction layer — <code>src/index.css:61-68</code></li>
+          <li>Press feedback is exactly right for a high-frequency surface: 120ms scale(0.96) on :active, no hover-scale inflation — <code>src/index.css:.btn-press</code></li>
+          <li>Scroll progress bar uses CSS <code>animation-timeline: scroll()</code> natively, with the rAF listener only as a legacy fallback — the banned <code>window.addEventListener("scroll")</code> pattern is correctly quarantined — <code>src/components/motion/PageTransition.jsx:91-104</code></li>
+          <li>Tooltips are origin-aware in both directions (rail tooltips emerge toward the trigger's right, header tooltips drop from it) and never animate keyboard paths — <code>src/index.css:645-668</code></li>
+        </ul>
+      </div>
+
+      <div class="lens-block">
+        <span class="mono-label">ISSUES TO ADDRESS</span>
+
+        <div class="finding-row" data-sev="crit">
+          <div class="finding-row__prose">
+            <div class="find-tags">
+              <span class="sev-chip crit">Critical</span>
+              <span class="lens-chip">Emil</span>
+              <span class="lens-chip">Jakub</span>
+            </div>              <h4>Registration modal vanishes on close — no exit state <span class="done-chip">Applied</span></h4>
+            <div class="find-body">
+              <p><span class="label">What</span>The registration modal (and all np-modal consumers: sponsor, superadmin management) animates in with a 300ms blur-free rise at scale 0.972, then unmounts in a single frame on Cancel, X, or success. The backdrop cut is doubled by a blur removal snap.</p>
+              <p><span class="label">Why it matters</span>Exits are the half of choreography that tells users "this is gone, and here's where focus returns." A hard cut on the most consequential form in the product (27 fields) reads as a crash at the exact moment users are most invested. This is the audit checklist's own Critical: "No exit animations (elements just disappear)."</p>
+              <div class="fix">
+                <p><span class="label">Recommended motion</span>Exit must be subtler than the enter: backdrop fades 300→0 over 200ms ease while the panel recedes upward (translateY(-6px) scale(0.99), 200ms expo-out). Drive it with a [data-closing] attribute and unmount after the 200ms window. Keyboard Escape and the success path skip the exit entirely — keyboard-initiated and completed-task dismissal should be instant.</p>
+              </div>
+              <p class="find-loc"><code>src/components/participant/ParticipantRegistrationModal.jsx:431</code> · <code>src/index.css:791-801</code></p>
+            </div>
+          </div>
+          <div class="demo">
+            <input class="vh" type="radio" name="st1" id="st1-a" checked>
+            <input class="vh" type="radio" name="st1" id="st1-l">
+            <input class="vh" type="radio" name="st1" id="st1-d">
+            <div class="demo__bar">
+              <div class="demo__meta">
+                <span class="demo__title">Modal exit, subtler than enter</span>
+                <span class="demo__timing">200ms · expo-out (recedes up)</span>
+              </div>
+              <div class="demo__controls">
+                <div class="seg">
+                  <label for="st1-a">Auto</label>
+                  <label for="st1-l">Light</label>
+                  <label for="st1-d">Dark</label>
+                </div>
+                <span class="demo__loop">↻</span>
+              </div>
+            </div>
+            <div class="demo__stage">
+              <div class="demo-1__mt">
+                <div class="ui-card">
+                  <div class="ui-label" style="margin-bottom: 8px;">Registration</div>
+                  <div class="ui-row">
+                    <span class="ui-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 13l4 4L19 7"/></svg></span>
+                    <span>27 fields, one goodbye</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="finding-row" data-sev="crit">
+          <div class="finding-row__prose">
+            <div class="find-tags">
+              <span class="sev-chip crit">Critical</span>
+              <span class="lens-chip">Emil</span>
+              <span class="lens-chip">Jakub</span>
+            </div>              <h4>Mobile drawer and its backdrop snap out of existence <span class="done-chip">Applied</span></h4>
+            <div class="find-body">
+              <p><span class="label">What</span>The mobile navigation drawer mounts instantly and closes by removing both elements from the DOM in one frame — backdrop and panel both. The same file's desktop rail, by contrast, animates its width with a 300ms ease-in-out, so the mobile experience is measurably less considered than the desktop one.</p>
+              <p><span class="label">Why it matters</span>This is primary UI on phones — the drawer is how every mobile user reaches Logout, Profile, and Settings. Motion gaps in primary UI are a Critical on the audit checklist, and the contrast with the polished desktop rail makes the snap feel broken rather than minimal.</p>
+              <div class="fix">
+                <p><span class="label">Recommended motion</span>Enter from the edge it lives on: panel slides translateX(-24px)→0 at 0.4→1 opacity over 300ms expo-out while the backdrop fades in. Exit subtler: translateX(-16px) fade over 220ms, backdrop 200ms. Release the body scroll lock at close-request time so the page is interactive while the drawer recedes, and cancel an in-flight close if the user re-opens mid-exit (the forwards fill would otherwise hold it invisible).</p>
+              </div>
+              <p class="find-loc"><code>src/components/layout/shell/DashboardShell.jsx:394-416</code></p>
+            </div>
+          </div>
+          <div class="demo">
+            <input class="vh" type="radio" name="st2" id="st2-a" checked>
+            <input class="vh" type="radio" name="st2" id="st2-l">
+            <input class="vh" type="radio" name="st2" id="st2-d">
+            <div class="demo__bar">
+              <div class="demo__meta">
+                <span class="demo__title">Drawer enter from its edge, subtle exit</span>
+                <span class="demo__timing">300ms in · 220ms out · expo-out</span>
+              </div>
+              <div class="demo__controls">
+                <div class="seg">
+                  <label for="st2-a">Auto</label>
+                  <label for="st2-l">Light</label>
+                  <label for="st2-d">Dark</label>
+                </div>
+                <span class="demo__loop">↻</span>
+              </div>
+            </div>
+            <div class="demo__stage">
+              <div class="demo-2__mt">
+                <div class="ui-card" style="min-width: 150px;">
+                  <div class="ui-label" style="margin-bottom: 8px;">Menu</div>
+                  <div class="ui-row"><span class="ui-num" style="font-size: 20px;">Dashboard</span></div>
+                  <div class="ui-row"><span class="ui-num" style="font-size: 20px;">Tournaments</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lens-block">
+        <span class="mono-label">OPPORTUNITIES</span>
+        <ul class="lens-list opp">
+          <li><span class="done-chip">Applied</span> The route-wipe transition runs 320 + 620ms per navigation — defensible on the landing, but worth A/B-ing against the plain 450ms pageIn on dashboard routes, where navigations are high-frequency — <code>src/components/motion/PageTransition.jsx:55-78</code></li>
+          <li><span class="done-chip">Applied</span> Two spring tokens exist; one (--ease-spring, an overshoot curve) is defined but unused. Delete it before someone applies it to a dropdown — <code>src/index.css:68</code></li>
+          <li>Sonner default position here is top-right while Emil's own default is bottom-right (out of the primary content's way); the dashboard header's notification bell sits top-right, so toasts can land near their trigger — worth a deliberate decision, not an accident — <code>src/App.jsx:114-119</code></li>
+          <li>Drawer/modal success paths currently skip the exit animation by design (state feedback covers it); if the modal ever gains a success state inside itself, that path should adopt the exit too</li>
+        </ul>
+      </div>
+
+      <p class="lens-sec__verdict" style="margin-top: 22px;">Through Emil's lens: the interaction layer passes every frequency-gate test he'd apply — press feedback is fast, tooltips are instant-on-keyboard, nothing loops on utility UI. The vanishing overlays he'd have flagged first ("elements just disappear" is the one failure mode his own libraries never ship) now exit with the same restraint they enter with.</p>
+    </section>
+
+    <section>
+      <div class="lens-sec__head">
+        <h3>Jakub Krehel — Production Polish</h3>
+        <span class="chip">Secondary</span>
+      </div>
+      <p class="lens-sec__verdict"><span class="dot ok"></span>Verdict: Strong — enters are textbook and the details are invisibly handled.</p>
+
+      <div class="lens-block">
+        <span class="mono-label">WHAT'S WORKING WELL</span>
+        <ul class="lens-list good">
+          <li>The npBoot enter is his exact recipe — opacity + translateY(18px) + scale(0.985) + blur(4px) resolving to sharp — and it starts from 0.985, not scale(0) — <code>src/index.css:761-775</code></li>
+          <li>Modal enter uses scale(0.97) with no overshoot; exits (once added) stay subtler than enters by design — <code>src/index.css:780-789</code></li>
+          <li>Stagger is opt-in (.np-stagger), capped at 12 rows, and reserved for dashboard lists — not slapped on every grid — <code>src/index.css:807-811</code></li>
+          <li>will-change appears exactly 7 times, only on continuously animating layers (ring, orbs, progress) — no global pollution — <code>src/index.css</code></li>
+          <li>The dead --ease-spring token (overshoot curve, zero consumers) shows the system is actively pruned; deleting it closes the last trap</li>
+        </ul>
+      </div>
+
+      <div class="lens-block">
+        <span class="mono-label">ISSUES TO ADDRESS</span>
+        <p class="lens-empty">No issues found at this severity level.</p>
+      </div>
+
+      <div class="lens-block">
+        <span class="mono-label">OPPORTUNITIES</span>
+        <ul class="lens-list opp">
+          <li><span class="done-chip">Applied</span> Icon swaps (theme Moon↔Sun, copy→check patterns) currently swap instantly; his opacity+scale+blur swap treatment would land here without adding a single loop — <code>src/components/layout/shell/DashboardShell.jsx</code></li>
+          <li><span class="done-chip">Applied</span> DashboardShell uses ease-in-out for the rail width transition; the system's own expo-out would match every other motion in the product — <code>src/components/layout/shell/DashboardShell.jsx:65</code></li>
+        </ul>
+      </div>
+
+      <p class="lens-sec__verdict" style="margin-top: 22px;">Through Jakub's lens: this is what production polish looks like before anyone notices it — enters materialize rather than pop, motion is reserved for real state changes, and the reduced-motion story is total. His consistency note (one easing family, applied everywhere, including the rail) is now closed.</p>
+    </section>
+
+    <section>
+      <div class="lens-sec__head">
+        <h3>Jhey Tompkins — Experimentation &amp; Delight</h3>
+        <span class="chip">Selective</span>
+      </div>
+      <p class="lens-sec__verdict"><span class="dot ok"></span>Verdict: Strong — the delight budget is spent on exactly two signature moments, both documented.</p>
+
+      <div class="lens-block">
+        <span class="mono-label">WHAT'S WORKING WELL</span>
+        <ul class="lens-list good">
+          <li>The GamesRing2 CSS-3D cylinder is a genuine signature moment: pure CSS custom-property-driven rotation with drag inertia and hover pause, and it collapses to a static captioned row under reduced motion — <code>src/components/landing/GamesRing2.jsx:13-27</code></li>
+          <li>Ambient motion is layered with restraint: glow orbs float on 9s alternate loops behind static art, the game-art figure bobs 9px — all transform-only, all killed under reduced motion — <code>src/index.css:380-395, 1017-1024</code></li>
+          <li>The .text-gradient brand shift runs on exactly one element (the hero display word) with design-contract rationale in the PRD — the anti-checklist's stated exception, not a slop pattern — <code>src/components/landing/HeroSection.jsx:235</code></li>
+        </ul>
+      </div>
+
+      <div class="lens-block">
+        <span class="mono-label">ISSUES TO ADDRESS</span>
+        <p class="lens-empty">No issues found at this severity level.</p>
+      </div>
+
+      <div class="lens-block">
+        <span class="mono-label">OPPORTUNITIES</span>
+        <ul class="lens-list opp">
+          <li>The route-wipe scene panels are the one place with room for a signature flourish (a subtle skew during the reveal beat) — only if dashboard navigation frequency tolerates it <span class="done-chip" style="margin-left:6px;">Superseded</span></li>
+        </ul>
+      </div>
+
+      <p class="lens-sec__verdict" style="margin-top: 22px;">Through Jhey's lens: the creative budget is small and deliberate, which is the hard part — one ring, one gradient word, one ambient field — and each has a documented reason to exist and a reduced-motion exit. Nothing here is CSS for CSS's sake, which is the highest compliment his lens can pay.</p>
+    </section>
+
+    <section>
+      <span class="mono-label">06 · COMBINED RECOMMENDATIONS</span>
+
+      <div class="tier-label tier-crit" id="rec-crit">
+        <span class="mono-label">CRITICAL · MUST FIX</span>
+        <span class="rule"></span>
+        <span class="mono-label">2</span>
+      </div>
+      <table class="rec-table">
+        <thead><tr><th></th><th>Issue</th><th>File</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr class="done">
+            <td>🔴</td>
+            <td><span class="done-chip">Applied</span> Registration modal vanishes on close (no exit animation)</td>
+            <td><code>ParticipantRegistrationModal.jsx:431</code></td>
+            <td>[data-closing] exit: backdrop 200ms fade + panel recede up (-6px, 0.99) 200ms expo-out; unmount after window; Escape/success instant</td>
+          </tr>
+          <tr class="done">
+            <td>🔴</td>
+            <td><span class="done-chip">Applied</span> Mobile drawer + backdrop snap out (primary mobile UI)</td>
+            <td><code>DashboardShell.jsx:394-416</code></td>
+            <td>[data-closing] exit: panel -16px fade 220ms, backdrop 200ms; release scroll lock at request; cancel in-flight close on re-open</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tier-label tier-imp" id="rec-imp">
+        <span class="mono-label">IMPORTANT · SHOULD FIX</span>
+        <span class="rule"></span>
+        <span class="mono-label">0</span>
+      </div>
+      <table class="rec-table">
+        <thead><tr><th></th><th>Issue</th><th>File</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td colspan="4" style="color: var(--faint); font-style: italic;">No findings at this severity.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="tier-label tier-opp" id="rec-opp">
+        <span class="mono-label">OPPORTUNITIES · COULD ENHANCE</span>
+        <span class="rule"></span>
+        <span class="mono-label">4</span>
+      </div>
+      <table class="rec-table">
+        <thead><tr><th></th><th>Enhancement</th><th>Where</th><th>Impact</th></tr></thead>
+        <tbody>
+          <tr class="done"><td>🟢 <span class="done-chip">Applied</span></td><td>Delete unused overshoot token --ease-spring before it gets applied to a dropdown</td><td><code>index.css:68</code></td><td>Closes the last bouncy-spring trap in the system</td></tr>
+          <tr class="done"><td>🟢 <span class="done-chip">Applied</span></td><td>Align rail width transition to the system's expo-out curve</td><td><code>DashboardShell.jsx:65</code></td><td>One easing family everywhere</td></tr>
+          <tr class="done"><td>🟢 <span class="done-chip">Applied</span></td><td>A/B the 940ms route wipe vs 450ms pageIn on dashboard routes — shipped as <span class="strike">940ms cinematic</span> 180ms fast-scrim variant (<code>np-wipe--fast</code>) on participant/organizer/sponsor/superadmin trees; landing/auth keep the cinematic wipe</td><td><code>PageTransition.jsx:55-78</code></td><td>Navigation is the highest-frequency transition in the app</td></tr>
+          <tr class="done"><td>🟢 <span class="done-chip">Applied</span></td><td>Animated icon swap (opacity+scale) for theme Moon↔Sun — shipped as an orbit-crossfade (both icons mounted, idle orbits ±90° at scale 0.6 while fading; 180ms opacity + 300ms cinematic transform) + missing <code>aria-label</code> added</td><td><code>DashboardShell.jsx</code></td><td>Jakub's polish treatment on a daily-use control</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <span class="mono-label">07 · LENS REFERENCE SUMMARY</span>
+      <div class="ref-summary">
+        <p><b>Lens referenced most: Emil Kowalski — Restraint &amp; Speed.</b> Both Critical findings and half the opportunities came from his gate: what happens at the end of a interaction matters as much as the start, and high-frequency surfaces earn the least motion.</p>
+        <p><b>To lean differently:</b> follow Emil harder by trimming the route wipe on dashboard routes; follow Jakub harder by adopting his animated icon-swap treatment on the theme toggle; follow Jhey harder by letting the route-wipe reveal carry one signature flourish once navigation cost is settled.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>NexusPlay · design-motion-principles audit</span>
+      <span>2 critical · 0 important · 4 opportunities · all resolved 2026-09-29 · audited 2026-09-28</span>
+    </footer>
+  </div>
+</body>
+</html>

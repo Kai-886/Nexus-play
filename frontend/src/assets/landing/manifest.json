@@ -1,0 +1,54 @@
+{
+  "generated": "2026-09-25T17:29:54.284Z",
+  "results": [
+    {
+      "file": "footer-bg.webp",
+      "width": 1600,
+      "bytesBefore": 2182882,
+      "bytesAfter": 101958,
+      "savedPct": 95
+    },
+    {
+      "file": "hero.webp",
+      "width": 1920,
+      "bytesBefore": 2249759,
+      "bytesAfter": 140738,
+      "savedPct": 94
+    },
+    {
+      "file": "login-bg.webp",
+      "width": 1200,
+      "bytesBefore": 1748503,
+      "bytesAfter": 45310,
+      "savedPct": 97
+    },
+    {
+      "file": "tournament-bgmi.webp",
+      "width": 1024,
+      "bytesBefore": 2453144,
+      "bytesAfter": 87754,
+      "savedPct": 96
+    },
+    {
+      "file": "tournament-cs2.webp",
+      "width": 1024,
+      "bytesBefore": 2385633,
+      "bytesAfter": 85326,
+      "savedPct": 96
+    },
+    {
+      "file": "tournament-free-fire.webp",
+      "width": 1024,
+      "bytesBefore": 2581079,
+      "bytesAfter": 104932,
+      "savedPct": 96
+    },
+    {
+      "file": "tournament-valorant.webp",
+      "width": 1024,
+      "bytesBefore": 2251316,
+      "bytesAfter": 68348,
+      "savedPct": 97
+    }
+  ]
+}
