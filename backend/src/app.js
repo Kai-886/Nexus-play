@@ -14,9 +14,20 @@ import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
+// Allowed browser origins: localhost in dev, plus whatever CLIENT_ORIGINS
+// provides in production (comma-separated). Same-origin Vercel hosting
+// means CORS rarely applies in prod, but we stay explicit.
+const clientOrigins = (
+    process.env.CLIENT_ORIGINS ||
+    "http://localhost:5173,http://localhost:5174"
+)
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 app.use(
     cors({
-        origin: ["http://localhost:5173", "http://localhost:5174"],
+        origin: clientOrigins,
         credentials: true,
     })
 );
