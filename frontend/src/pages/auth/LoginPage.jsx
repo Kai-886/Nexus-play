@@ -7,6 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import AuthShell from "../../components/auth/AuthShell";
 import AuthInput from "../../components/auth/AuthInput";
 import Button from "../../components/ui/Button";
+import catLogo from "../../assets/cat-logo.jpg";
 
 const perks = [
   { icon: Trophy, title: "Discover tournaments", body: "Explore exciting esports events." },
@@ -77,6 +78,7 @@ export function LoginPage() {
     <AuthShell
       width="max-w-md"
       shakeKey={shakeKey}
+      brandLogo={catLogo}
       eyebrow="Welcome back"
       title="Sign In"
       subtitle="Enter your credentials to continue."

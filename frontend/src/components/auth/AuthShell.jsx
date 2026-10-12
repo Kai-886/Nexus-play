@@ -22,6 +22,8 @@ import { Link } from "react-router-dom";
  *   width                   — card max-width class (default max-w-md)
  *   tilt                    — enable card tilt (default true)
  *   shakeKey                — change to trigger card shake
+ *   brandLogo               — optional image URL for the brand mark
+ *                             (falls back to the gamepad icon)
  */
 export function AuthShell({
   eyebrow,
@@ -32,6 +34,7 @@ export function AuthShell({
   width = "max-w-md",
   tilt = true,
   shakeKey = 0,
+  brandLogo = null,
 }) {
   const { tiltProps } = useTilt({ maxTilt: 3 });
 
@@ -64,8 +67,20 @@ export function AuthShell({
               className="np-boot mb-7 flex items-center justify-center gap-2.5 lg:justify-start"
               style={{ "--boot-delay": "0ms" }}
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--np-accent)] shadow-lg shadow-indigo-600/30">
-                <Gamepad2 className="h-5 w-5 text-white" />
+              <span
+                className={`flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl shadow-lg shadow-indigo-600/30 ${
+                  brandLogo ? "bg-white" : "bg-[var(--np-accent)]"
+                }`}
+              >
+                {brandLogo ? (
+                  <img
+                    src={brandLogo}
+                    alt="NexusPlay logo"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Gamepad2 className="h-5 w-5 text-white" />
+                )}
               </span>
 
               <span className="font-display text-xl font-bold tracking-tight">

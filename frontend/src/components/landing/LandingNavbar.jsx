@@ -1,5 +1,5 @@
-import { Gamepad2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import catLogo from "../../assets/cat-logo.jpg";
 
 export default function LandingNavbar() {
   return (
@@ -9,8 +9,12 @@ export default function LandingNavbar() {
           to="/"
           className="btn-press flex items-center gap-2 transition-transform hover:scale-[1.03]"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 shadow-lg shadow-indigo-600/30 lg:h-9 lg:w-9">
-            <Gamepad2 className="h-4 w-4 text-white lg:h-5 lg:w-5" />
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white shadow-lg shadow-indigo-600/30 lg:h-9 lg:w-9">
+            <img
+              src={catLogo}
+              alt="NexusPlay logo"
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <span className="text-base font-bold sm:text-lg lg:text-xl">
