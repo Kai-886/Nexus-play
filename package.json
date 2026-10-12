@@ -1,0 +1,10 @@
+{
+  "name": "nexusplay",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "NexusPlay esports tournament platform - Vercel deploy root (hosts the serverless API entry)",
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}
