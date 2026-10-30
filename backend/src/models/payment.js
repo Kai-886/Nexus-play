@@ -7,6 +7,14 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    // Gateway order id (entry-fee checkout). Kept stable after payment so
+    // the order -> payment relationship stays auditable even after
+    // transactionId is updated to the payment id on success.
+    orderId: {
+      type: String,
+      default: null,
+      index: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

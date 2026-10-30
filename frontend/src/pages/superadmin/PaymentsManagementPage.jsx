@@ -68,7 +68,16 @@ const getSponsorName = (payment) => {
     return payment.sponsorId.brandName;
   }
 
-  return payment.sponsorUserId?.name || "Unknown Sponsor";
+  if (payment.sponsorUserId?.name) {
+    return payment.sponsorUserId.name;
+  }
+
+  // Entry-fee checkouts: the payer is the participant captain.
+  if (payment.userId?.name) {
+    return payment.userId.name;
+  }
+
+  return "Unknown Sponsor";
 };
 
 const getTournamentName = (payment) => {
@@ -123,7 +132,23 @@ export const PaymentsManagementPage = () => {
 
       const response = await adminService.getPayments();
 
-      setPayments(response?.payments || []);
+      const rows = response?.payments || response?.data || [];
+
+      /*
+       * Ledger rows come from the Payment collection: entry-fee checkouts
+       * use status "success" and have no paidAt, while sponsorship rows
+       * carry paymentStatus/paidAt. Normalize both into the shape this page
+       * renders.
+       */
+      setPayments(
+        rows.map((row) => ({
+          ...row,
+          paymentStatus:
+            row.paymentStatus ||
+            (row.status === "success" ? "paid" : row.status),
+          paidAt: row.paidAt || row.createdAt,
+        })),
+      );
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load payments");
     } finally {

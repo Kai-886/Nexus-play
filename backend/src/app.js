@@ -11,6 +11,7 @@ import superAdminRoutes from "./routes/superAdminRoutes.js";
 import participantRoutes from "./routes/participantRoutes.js";
 import sponsorRoutes from './routes/sponsorRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1", registrationRoutes);
 app.use("/api/v1/superadmin", superAdminRoutes);
 app.use("/api/v1/participant", participantRoutes);
+app.use("/api/v1", paymentRoutes);
 
 
 

@@ -11,6 +11,7 @@ import Badge from "../ui/Badge";
 
 import { useAuth } from "../../context/AuthContext";
 import { participantService } from "../../services/participantService";
+import { paymentService } from "../../services/paymentService";
 
 const TOTAL_TEAM_PLAYERS = 4;
 
@@ -54,6 +55,17 @@ export function ParticipantRegistrationModal({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  /*
+   * Paid entry fees run a real checkout step before registration exists:
+   * form -> payment (order created) -> verify -> register. `paidRef` holds
+   * verified gateway ids so a failed registration retry never charges twice.
+   */
+  const [stage, setStage] = useState("form");
+  const [pendingOrder, setPendingOrder] = useState(null);
+  const [pendingPayload, setPendingPayload] = useState(null);
+  const [payBusy, setPayBusy] = useState(false);
+  const paidRef = useRef(null);
 
   /*
    * Exit choreography: set [data-closing] so the CSS exit animations play,
@@ -290,6 +302,128 @@ export function ParticipantRegistrationModal({
     return Object.keys(newErrors).length === 0;
   };
 
+  /* Complete registration once the (optional) payment is verified. */
+  const performRegistration = async (registrationData, payment) => {
+    const id = tournament._id || tournament.id;
+
+    try {
+      setIsSubmitting(true);
+
+      await participantService.registerTournament(
+        id,
+        registrationData,
+        payment || undefined,
+      );
+
+      toast.success("Registration completed successfully!");
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      onClose();
+      return true;
+    } catch (error) {
+      console.error("Tournament registration error:", error);
+
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Registration failed. Please try again.";
+
+      toast.error(message);
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const loadRazorpayScript = () =>
+    new Promise((resolve, reject) => {
+      if (window.Razorpay) return resolve();
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = resolve;
+      script.onerror = () =>
+        reject(new Error("Could not load the payment gateway"));
+      document.body.appendChild(script);
+    });
+
+  /* Hosted checkout (razorpay mode): the signature comes from the gateway. */
+  const runRazorpayCheckout = async (order) => {
+    await loadRazorpayScript();
+
+    return new Promise((resolve, reject) => {
+      const rzp = new window.Razorpay({
+        key: order.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID,
+        order_id: order.orderId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "NexusPlay",
+        description: `Entry fee - ${tournamentTitle}`,
+        theme: { color: "#6366f1" },
+        handler: (response) =>
+          resolve({
+            orderId: order.orderId,
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+          }),
+        modal: { ondismiss: () => reject(new Error("Payment cancelled")) },
+      });
+
+      // Declined/expired gateway payments never reach `handler`; without
+      // this listener the checkout promise would hang until dismiss.
+      rzp.on("payment.failed", (response) => {
+        reject(
+          new Error(
+            response?.error?.description ||
+              "Payment failed. You have not been charged."
+          )
+        );
+      });
+
+      rzp.open();
+    });
+  };
+
+  /* Pay -> verify signature server-side -> register. Never register first. */
+  const handlePay = async () => {
+    if (payBusy || !pendingOrder) return;
+
+    setPayBusy(true);
+    try {
+      let paymentIds = paidRef.current;
+
+      if (!paymentIds) {
+        if (pendingOrder.mode === "sandbox") {
+          const checkout = await paymentService.sandboxCheckout(
+            pendingOrder.orderId,
+          );
+          paymentIds = {
+            orderId: pendingOrder.orderId,
+            paymentId: checkout.paymentId,
+            signature: checkout.signature,
+          };
+        } else {
+          paymentIds = await runRazorpayCheckout(pendingOrder);
+        }
+
+        await paymentService.verify(paymentIds);
+        paidRef.current = paymentIds;
+      }
+
+      const ok = await performRegistration(pendingPayload, paymentIds);
+      if (ok) paidRef.current = null;
+    } catch (error) {
+      console.error("Payment error:", error);
+      const message =
+        error?.response?.data?.message || error?.message || "Payment failed";
+      toast.error(message);
+    } finally {
+      setPayBusy(false);
+    }
+  };
+
   /*
    * Submit registration.
    */
@@ -394,20 +528,21 @@ export function ParticipantRegistrationModal({
         },
       };
 
-      await participantService.registerTournament(
-        tournamentId,
-        registrationData,
-      );
-
-      toast.success("Registration completed successfully!");
-
-      if (onSuccess) {
-        onSuccess();
+      // Free tournament: register directly, unchanged path.
+      if (!(Number(entryFee) > 0)) {
+        await performRegistration(registrationData, null);
+        return;
       }
 
-      onClose();
+      // Paid: create a gateway order and switch to the checkout step.
+      // The registration itself only happens after signature verification.
+      const order = await paymentService.createOrder(tournamentId);
+      paidRef.current = null;
+      setPendingOrder(order);
+      setPendingPayload(registrationData);
+      setStage("payment");
     } catch (error) {
-      console.error("Tournament registration error:", error);
+      console.error("Registration submit error:", error);
 
       const message =
         error?.response?.data?.message ||
@@ -523,7 +658,84 @@ export function ParticipantRegistrationModal({
           </button>
         </div>
 
-        {/* Form */}
+        {/* Form / Checkout step */}
+        {stage === "payment" ? (
+          <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+            <div className="space-y-1">
+              <p className="np-eyebrow">Secure Checkout</p>
+
+              <h3 className="text-base font-bold theme-text">
+                Pay the entry fee to complete your registration
+              </h3>
+
+              <p className="theme-subtext leading-relaxed">
+                Your slot is confirmed only after this payment succeeds.
+              </p>
+            </div>
+
+            <div className="rounded-xl border theme-border p-4 space-y-2.5 bg-black/5 dark:bg-white/5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="theme-subtext">Amount</span>
+                <span className="text-base font-bold tabular-nums text-[var(--np-success)]">
+                  ₹{entryFee}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="theme-subtext">Order ID</span>
+                <span className="font-mono text-[11px] theme-text break-all text-right">
+                  {pendingOrder?.orderId}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="theme-subtext">Gateway</span>
+                <span className="font-semibold theme-text">
+                  {pendingOrder?.mode === "sandbox"
+                    ? "Sandbox Checkout (test mode)"
+                    : "Razorpay"}
+                </span>
+              </div>
+
+              <p className="text-[11px] theme-subtext pt-1 border-t theme-border">
+                {pendingOrder?.mode === "sandbox"
+                  ? "Sandbox test mode — no real money moves."
+                  : "Razorpay test mode — demo payment, no real money moves."}
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setStage("form")}
+                disabled={payBusy}
+                className="px-4 py-2 font-bold theme-subtext hover:theme-text rounded-xl border theme-border cursor-pointer disabled:opacity-50"
+              >
+                Back
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePay}
+                disabled={payBusy || isSubmitting}
+                className="btn-press np-press flex-1 px-5 py-2.5 font-bold text-white [background:var(--np-accent)] hover:[background:var(--np-accent-strong)] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition cursor-pointer inline-flex items-center justify-center gap-1.5"
+              >
+                {payBusy || isSubmitting ? (
+                  <span
+                    className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+
+                {payBusy || isSubmitting
+                  ? "Processing payment..."
+                  : `Pay ₹${entryFee}`}
+              </button>
+            </div>
+          </div>
+        ) : (
         <form
           onSubmit={handleSubmit}
           className="p-6 overflow-y-auto space-y-6 flex-1 text-xs"
@@ -985,11 +1197,16 @@ export function ParticipantRegistrationModal({
                   <CheckCircle2 className="w-4 h-4" />
                 )}
 
-                {isSubmitting ? "Submitting..." : "Submit Registration"}
+                {isSubmitting
+                  ? "Submitting..."
+                  : Number(entryFee) > 0
+                    ? `Pay ₹${entryFee} & Register`
+                    : "Submit Registration"}
               </button>
             </div>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

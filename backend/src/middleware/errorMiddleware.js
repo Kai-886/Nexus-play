@@ -19,9 +19,14 @@ export default(err,req,res,next) =>{
         error = new ErrorHandler(message,400);
     }
 
-    res.status(error.statusCode).json({
-        message:error.message,
-        error:err,
-        stack:err?.stack
-    });
+    const payload = { message: error.message };
+
+    // Raw error objects and stack traces are development aids only — sending
+    // them to clients exposes internals (SMTP replies, absolute file paths).
+    if (process.env.NODE_ENV !== "production") {
+        payload.error = err;
+        payload.stack = err?.stack;
+    }
+
+    res.status(error.statusCode).json(payload);
 };

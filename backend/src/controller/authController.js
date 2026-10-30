@@ -131,7 +131,17 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
         await user.save();
 
-        return next(new ErrorHandler(error.message, 500));
+        // SMTP failures (bad relay credentials, network) must not reach the
+        // client as a raw 500 carrying provider details — log server-side,
+        // tell the user plainly.
+        console.error("Password reset email failed:", error.message);
+
+        return next(
+            new ErrorHandler(
+                "Could not send the password reset email right now. Please try again later.",
+                503
+            )
+        );
     }
 });
 

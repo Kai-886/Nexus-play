@@ -6,6 +6,7 @@ import Tournament from "../models/tournament.js";
 
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
+import Payment from "../models/payment.js";
 
 // Register participant or team in a tournament
 export const registerParticipant = catchAsyncErrors(
@@ -266,6 +267,42 @@ export const registerParticipant = catchAsyncErrors(
                     400
                 )
             );
+        }
+
+        // Paid tournaments: the entry fee must have been verified by the
+        // payment gateway before the registration exists. Free tournaments
+        // never reach this branch.
+        const entryFee = Number(tournament.entryFee) || 0;
+
+        if (entryFee > 0) {
+            const { orderId, paymentId } = req.body.payment || {};
+
+            if (!orderId || !paymentId) {
+                return next(
+                    new ErrorHandler(
+                        "Payment required: complete checkout before registering",
+                        402
+                    )
+                );
+            }
+
+            const paid = await Payment.findOne({
+                orderId,
+                transactionId: paymentId,
+                userId: req.user._id,
+                tournamentId: tournament._id,
+                status: "success",
+                amount: entryFee,
+            });
+
+            if (!paid) {
+                return next(
+                    new ErrorHandler(
+                        "Payment for this entry fee could not be verified",
+                        402
+                    )
+                );
+            }
         }
 
         // Create registration

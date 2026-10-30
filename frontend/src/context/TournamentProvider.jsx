@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { tournamentService } from "../services/tournamentService";
 import { TournamentContext } from "./TournamentContext";
+import { useAuth } from "./AuthContext";
 
 // Read local storage tournaments helper (module scope — no component state)
 const getLocalTournaments = () => {
@@ -16,6 +17,8 @@ export function TournamentProvider({ children }) {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   // Fetch API + LocalStorage tournaments combined
   const fetchMyTournaments = useCallback(async () => {
@@ -59,12 +62,30 @@ export function TournamentProvider({ children }) {
     });
   };
 
+  /*
+   * GET /tournaments/me is organizer-only on the backend, so fetching it at
+   * app root produced a guaranteed 401 for anonymous visitors and a 403 for
+   * every participant/sponsor/superadmin session — on every page load, for a
+   * context only the organizer pages consume. Wait for the auth probe, then
+   * call it only for organizers; everyone else gets the local copy silently.
+   */
   useEffect(() => {
-    const run = async () => {
-      await fetchMyTournaments();
-    };
-    run();
-  }, [fetchMyTournaments]);
+    if (authLoading) return;
+
+    // Defer every state update one tick: setState synchronously in an
+    // effect body trips react-hooks/set-state-in-effect (cascading
+    // renders). This effect only reacts to the auth probe resolving.
+    const timer = setTimeout(() => {
+      if (isAuthenticated && user?.role === "organizer") {
+        fetchMyTournaments();
+      } else {
+        setTournaments(getLocalTournaments());
+        setError(null);
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [fetchMyTournaments, authLoading, isAuthenticated, user?.role]);
 
   const value = {
     tournaments,

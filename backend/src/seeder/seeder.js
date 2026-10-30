@@ -5,6 +5,21 @@ import User from "../models/user.js";
 
 dotenv.config();
 
+// Fail fast with a clear message instead of hitting mongoose validation errors
+const missingEnv = ["SUPERADMIN_EMAIL", "SUPERADMIN_PASSWORD"].filter(
+    (key) => !process.env[key]
+);
+
+if (missingEnv.length > 0) {
+    console.error(
+        `Seeder aborted: missing required environment variable(s): ${missingEnv.join(", ")}`
+    );
+    console.error(
+        "Add them to backend/.env (see backend/.env.example) and re-run: node src/seeder/seeder.js"
+    );
+    process.exit(1);
+}
+
 const createSuperAdmin = async () => {
     try {
         // Connect to database

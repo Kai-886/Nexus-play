@@ -8,13 +8,15 @@ export default (user,statusCode,res) =>{
         httpOnly:true,
     };
 
-    // user.password = undefined
-
+    // Never ship the password hash to the client (login/register/reset all
+    // route through here, and some of those loads requested +password).
+    const safeUser = typeof user.toObject === "function" ? user.toObject() : { ...user };
+    delete safeUser.password;
 
     res.status(statusCode).cookie("token",token,cookieOptions).json({
         success:true,
         token,
-        user
+        user: safeUser
     })
 
 }

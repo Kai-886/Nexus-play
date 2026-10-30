@@ -243,13 +243,33 @@ export const updateSponsorStatus = catchAsyncErrors(async (req, res, next) => {
 });
 
 // @route   GET /api/v1/admin/payments
-// @desc    Get payment and escrow ledger
+// @desc    Get payment and escrow ledger (entry fees + sponsorships)
 export const getAllPayments = catchAsyncErrors(async (req, res, next) => {
-  const payments = await Payment.find().sort({ createdAt: -1 });
+  const payments = await Payment.find()
+    .populate("userId", "name email")
+    .populate("tournamentId", "title")
+    .sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,
     data: payments,
+  });
+});
+
+// @route   GET /api/v1/admin/payments/:id
+// @desc    Single ledger entry
+export const getPaymentById = catchAsyncErrors(async (req, res, next) => {
+  const payment = await Payment.findById(req.params.id)
+    .populate("userId", "name email")
+    .populate("tournamentId", "title");
+
+  if (!payment) {
+    return next(new ErrorHandler("Payment not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: payment,
   });
 });
 

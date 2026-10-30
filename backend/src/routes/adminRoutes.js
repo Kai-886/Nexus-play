@@ -13,6 +13,7 @@ import {
   getAllSponsorsAdmin,
   updateSponsorStatus,
   getAllPayments,
+  getPaymentById,
   getReports,
 } from "../controller/adminController.js";
 import { isAuthenticatedUser, authorizeRoles } from "../middleware/auth.js";
@@ -46,6 +47,7 @@ router.route("/sponsors/:id/status").patch(updateSponsorStatus);
 
 // Payments & Ledger
 router.route("/payments").get(getAllPayments);
+router.route("/payments/:id").get(getPaymentById);
 
 // Strategic Reports
 router.route("/reports").get(getReports);

@@ -20,18 +20,6 @@ async function seed() {
     );
     console.log("MongoDB connected");
 
-    // Skip if already seeded
-    const existing = await Tournament.countDocuments({
-        status: { $in: ["published", "ongoing"] },
-    });
-    if (existing > 0) {
-        console.log(
-            `Found ${existing} published/ongoing tournament(s) already - seed skipped.`
-        );
-        await mongoose.disconnect();
-        return;
-    }
-
     // Reuse the root superadmin as the organizer owner (schema requires one)
     const admin = await User.findOne({ role: "superadmin" });
     if (!admin) {
@@ -193,11 +181,52 @@ async function seed() {
         },
     ];
 
-    const created = await Tournament.insertMany(demos);
-    console.log(`Seeded ${created.length} demo tournaments`);
-    created.forEach((t) =>
-        console.log(`  - ${t.title} (${t.game}) ₹${t.prizePool}`)
-    );
+    // Re-running the seed must be safe AND useful: insert demos that are
+    // missing, and roll forward demo tournaments whose registration window
+    // already passed. Without the roll-forward the demo data expires in place
+    // and every visitor sees an empty "No tournaments found" browse page.
+    const demoTitles = demos.map((d) => d.title);
+    const already = await Tournament.find({ title: { $in: demoTitles } });
+    const byTitle = new Map(already.map((t) => [t.title, t]));
+
+    const missing = demos.filter((d) => !byTitle.has(d.title));
+    let inserted = [];
+    if (missing.length > 0) {
+        inserted = await Tournament.insertMany(missing);
+        console.log(`Seeded ${inserted.length} demo tournament(s)`);
+        inserted.forEach((t) =>
+            console.log(`  - ${t.title} (${t.game}) ₹${t.prizePool}`)
+        );
+    }
+
+    let refreshed = 0;
+    for (const demo of demos) {
+        const doc = byTitle.get(demo.title);
+        if (!doc) continue;
+
+        const expired =
+            !doc.registrationDeadline ||
+            doc.registrationDeadline.getTime() < now ||
+            ["completed", "cancelled"].includes(doc.status);
+
+        if (!expired) continue;
+
+        doc.startDate = demo.startDate;
+        doc.endDate = demo.endDate;
+        doc.registrationDeadline = demo.registrationDeadline;
+        doc.status = "published";
+        await doc.save();
+        refreshed += 1;
+        console.log(`  ~ rolled forward: ${doc.title}`);
+    }
+
+    if (inserted.length === 0 && refreshed === 0) {
+        console.log("Demo tournaments already current - nothing changed.");
+    } else {
+        console.log(
+            `Demo data ready: ${inserted.length} inserted, ${refreshed} rolled forward.`
+        );
+    }
 
     await mongoose.disconnect();
     console.log("Done");

@@ -134,6 +134,17 @@ export const adminService = {
     return response.data;
   },
 
+  // Payment & escrow ledger (entry fees + sponsorships, one collection)
+  getPayments: async () => {
+    const response = await api.get("/admin/payments");
+    return response.data;
+  },
+
+  getPayment: async (id) => {
+    const response = await api.get(`/admin/payments/${id}`);
+    return response.data;
+  },
+
   getSponsorships: async () => {
     const response = await api.get("/superadmin/sponsorships");
     return response.data;

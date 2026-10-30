@@ -20,11 +20,15 @@ export const participantService = {
     return response.data;
   },
 
-  // Register for a tournament
-  registerTournament: async (tournamentId, registrationData) => {
+  // Register for a tournament (payment: gateway order ids for paid events)
+  registerTournament: async (tournamentId, registrationData, payment) => {
+    const payload = payment
+      ? { ...registrationData, payment }
+      : registrationData;
+
     const response = await api.post(
       `/tournaments/${tournamentId}/register`,
-      registrationData
+      payload
     );
 
     return response.data;
