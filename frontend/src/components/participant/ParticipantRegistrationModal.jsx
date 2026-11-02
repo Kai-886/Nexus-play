@@ -362,6 +362,15 @@ export function ParticipantRegistrationModal({
         name: "NexusPlay",
         description: `Entry fee - ${tournamentTitle}`,
         theme: { color: "#6366f1" },
+        /* The entry form already collected these: prefilling them
+         * skips (or pre-fills) the hosted checkout contact-details step,
+         * whose Continue button validates silently and stalled manual
+         * test payments on live. */
+        prefill: {
+          name: formData.captainName.trim(),
+          email: formData.captainEmail.trim(),
+          contact: formData.captainPhone.replace(/\D/g, ""),
+        },
         handler: (response) =>
           resolve({
             orderId: order.orderId,
